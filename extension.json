@@ -1,0 +1,90 @@
+{
+	"name": "ATBridge",
+	"type": "other",
+	"version": "1.0.0",
+	"author": [
+		"TheElm"
+	],
+	"url": "https://github.com/wiki-gg-oss/mediawiki-extensions-ATBridge",
+	"descriptionmsg": "extatproto-desc",
+	"license-name": "GPL-3.0-or-later",
+	"requires": {
+		"MediaWiki": ">= 1.41.0",
+		"platform": {
+			"php": ">= 8.1"
+		}
+	},
+	"MessagesDirs": {
+		"ATBridge": [
+			"i18n"
+		]
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\ATBridge\\": "src/"
+	},
+	"ServiceWiringFiles": [
+		"src/ServiceWiring.php"
+	],
+	"JobClasses": {
+	},
+	"Hooks": {
+		"ATProtoPlatformRegistration": "Default",
+		"ATProtoDomainValidationRegistration": "Default"
+	},
+	"HookHandlers": {
+		"Default": {
+			"class": "MediaWiki\\Extension\\ATBridge\\DefaultRegistrationHooks"
+		}
+	},
+	"AvailableRights": [
+		"atproto-manage",
+		"atproto-manage-dangerous",
+		"atproto-post",
+		"atproto-post-images",
+		"atproto-post-embeds",
+		"atproto-post-delete",
+		"atproto-post-deleteany",
+		"atproto-repost",
+		"atproto-repost-global"
+	],
+	"config_prefix": "wgATProto",
+	"config": {
+		"Email": {
+			"description": "The email that is used for registering accounts. An Email is required for registering to BlueSky.",
+			"value": null
+		},
+		"DescPrefix": {
+			"description": "",
+			"value": ""
+		},
+		"DescSuffix": {
+			"description": "",
+			"value": ""
+		},
+		"PostCategories": {
+			"description": "",
+			"value": {
+				"announcements": {
+					"name": "",
+					"description": "",
+					"required": false
+				},
+				"updates": {
+					"name": "",
+					"description": "",
+					"required": false
+				},
+				"maintenance": {
+					"name": "",
+					"description": "",
+					"required": true
+				}
+			}
+		},
+		"ValidatorSettings": {
+			"description": "",
+			"value": {}
+		}
+	},
+	"manifest_version": 2
+}
