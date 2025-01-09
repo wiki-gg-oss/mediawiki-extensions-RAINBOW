@@ -1,6 +1,8 @@
-# ATBridge
+# RAINBOW
 
-This repository is for an extension for MediaWiki.
+This repository is for an extension for MediaWiki to integrate with Bluesky's ATProtocol.
+
+RAINBOW (Reach An Integrated Network (Bluesky), On-Wiki)
 
 ## Considerations
 
@@ -27,7 +29,7 @@ In the case of wikifarms this extension also offers to its staff the ability to 
 Below are the set of configuration options and their default values.
 
 ```php
-$wgCentralWiki = null;
+$wgATProtoCentralWiki = null;
 ```
 
 Sets the central Database identifier to be used for storing accounts in. This table is later referenced for doing cross-wiki reposts.
@@ -75,6 +77,12 @@ $wgATProtoValidatorSettings = [
 ```
 
 Configure options for Domain validators. The only built-in option is utilizing the `.well-known` folder, which can be defined to a specific path.
+
+```php
+$wgATProtoEncryptionKey = null;
+```
+
+Encryption key used for storing and reading account passwords from the database.
 
 ## Permissions
 
