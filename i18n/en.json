@@ -4,5 +4,5 @@
 			"TheElm"
 		]
 	},
-	"extatproto-desc": "Bridge to allow wiki admins to post content to platforms that support the AT Protocol, such as BlueSky"
+	"rainbow-desc": "Bridge to allow wiki admins to post content to platforms that support the AT Protocol, such as BlueSky"
 }

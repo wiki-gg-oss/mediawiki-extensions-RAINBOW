@@ -3,6 +3,7 @@
 namespace MediaWiki\Extension\ATBridge\Abstractions;
 
 use MediaWiki\Extension\ATBridge\Services\ATProtoPlatformHelper;
+use MediaWiki\Extension\ATBridge\SocialMediaUser;
 
 /**
  * Abstract Platform implementation that uses AT Protocol
@@ -12,6 +13,7 @@ abstract class AbstractATProtoPlatform {
 		public readonly string $name,
 		private readonly ATProtoPlatformHelper $helper
 	) {
+		
 	}
 
 	/**
@@ -28,5 +30,21 @@ abstract class AbstractATProtoPlatform {
 	 */
 	public function supportedDomainValidation(): array {
 		return [ 'well-known', 'dns' ];
+	}
+
+	/**
+	 * Get the maximum allowed description length
+	 * @return int
+	 */
+	public function maxDescriptionLength(): int {
+		return 255;
+	}
+
+	/**
+	 * Get the user for this Platform
+	 * @return ?SocialMediaUser
+	 */
+	public function getUser(): ?SocialMediaUser {
+		return $this->helper->getUser( $this->name );
 	}
 }

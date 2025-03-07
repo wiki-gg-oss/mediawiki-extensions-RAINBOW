@@ -19,16 +19,11 @@ abstract class AbstractATAPI {
 		] );
 	}
 
-	/**
-	 * POST a payload to the account creation endpoint
-	 * @param array $payload Payload details for creation
-	 * @return ?string
-	 */
-	public function createAccount( array $payload ): ?string {
-		return $this->post( '/xrpc/com.atproto.server.createAccount', $payload );
+	public function get( $path ): ?string {
+		return $this->requestFactory->get( $this->urls->expand( $path ) );
 	}
 
-	protected function post( $path, array $payload ): ?string {
+	public function post( $path, array $payload ): ?string {
 		$req = $this->requestFactory->create( $this->urls->expand( $path ), [
 			// Encode our payload into JSON
 			'postData' => FormatJson::encode( $payload, false, FormatJson::ALL_OK )

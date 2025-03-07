@@ -1,15 +1,15 @@
 {
-	"name": "ATBridge",
+	"name": "RAINBOW",
 	"type": "other",
 	"version": "1.0.0",
 	"author": [
 		"TheElm"
 	],
 	"url": "https://github.com/wiki-gg-oss/mediawiki-extensions-ATBridge",
-	"descriptionmsg": "extatproto-desc",
+	"descriptionmsg": "rainbow-desc",
 	"license-name": "GPL-3.0-or-later",
 	"requires": {
-		"MediaWiki": ">= 1.41.0",
+		"MediaWiki": ">= 1.43.0",
 		"platform": {
 			"php": ">= 8.1"
 		}
@@ -26,6 +26,9 @@
 		"src/ServiceWiring.php"
 	],
 	"JobClasses": {
+	},
+	"SpecialPages": {
+		"Socials": "MediaWiki\\Extension\\ATBridge\\Specials\\SpecialSocials"
 	},
 	"Hooks": {
 		"ATProtoPlatformRegistration": "Default",
@@ -49,20 +52,24 @@
 	],
 	"config_prefix": "wgATProto",
 	"config": {
+		"CentralWiki": {
+			"description": "Database identifier to be used for storing accounts in.",
+			"value": null
+		},
 		"Email": {
 			"description": "The email that is used for registering accounts. An Email is required for registering to BlueSky.",
 			"value": null
 		},
 		"DescPrefix": {
-			"description": "",
-			"value": ""
+			"description": "Forces a Prefix into the description of the account. Otherwise allows users to customize the accounts description.",
+			"value": null
 		},
 		"DescSuffix": {
-			"description": "",
-			"value": ""
+			"description": "Forces a Suffix into the description of the account. Otherwise allows users to customize the accounts description.",
+			"value": null
 		},
 		"PostCategories": {
-			"description": "",
+			"description": "Categories that a ",
 			"value": {
 				"announcements": {
 					"name": "",
@@ -82,8 +89,12 @@
 			}
 		},
 		"ValidatorSettings": {
-			"description": "",
+			"description": "Validator settings passed into Domain Validators",
 			"value": {}
+		},
+		"EncryptionKey": {
+			"description": "Encryption key used for storing and reading account passwords from the database.",
+			"value": null
 		}
 	},
 	"manifest_version": 2

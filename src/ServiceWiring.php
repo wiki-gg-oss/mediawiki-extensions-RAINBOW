@@ -8,11 +8,16 @@ return [
 	ATProtoHelper::ServiceName => static function (
 		MediaWikiServices $services
 	) {
-		return new ATProtoHelper( $services->getHookContainer() );
+		return new ATProtoHelper(
+			$services->getHookContainer()
+		);
 	},
 	ATProtoPlatformHelper::ServiceName => static function(
 		MediaWikiServices $services
 	) {
-		return new ATProtoPlatformHelper();
+		return new ATProtoPlatformHelper(
+			$services->getMainConfig(),
+			$services->getDBLoadBalancerFactory()
+		);
 	}
 ];
