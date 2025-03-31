@@ -4,9 +4,10 @@ namespace MediaWiki\Extension\ATBridge\Specials;
 
 use ErrorPageError;
 use MediaWiki\Extension\ATBridge\Consts\GrantNames;
+use MediaWiki\Extension\ATBridge\Services\ATProtoPlatformHelper;
+use MediaWiki\Extension\ATBridge\SocialMediaUser;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\SpecialPage\SpecialPage;
-use MediaWiki\Title\Title;
 use MediaWiki\User\User;
 use PermissionsError;
 
@@ -15,7 +16,16 @@ class SpecialSocials extends SpecialPage {
         parent::__construct( 'Socials', '', true );
     }
 
-    public function userCanExecute( User $user ) {
+    private function getHelper(): ATProtoPlatformHelper {
+        return MediaWikiServices::getInstance()
+            ->getService(ATProtoPlatformHelper::ServiceName);
+    }
+
+    /**
+     * @param User $user
+     * @return bool
+     */
+    public function userCanExecute( User $user ): bool {
         return MediaWikiServices::getInstance()
             ->getPermissionManager()
             ->userHasAnyRight( $user,
@@ -45,22 +55,45 @@ class SpecialSocials extends SpecialPage {
         $this->outputHeader();
 
         if ( $subPage ) {
-            [ $type, $accountNum ] = str_split( $subPage, 2 );
+            [ $type, $accountNum ] = explode( '/', $subPage, 2 );
 
-            // TODO: Run a db search for the account
-            $this->executeAccountView( $type, $accountNum );
-            return;
+            if ( is_numeric( $accountNum ) ) {
+                // Run a db search for the account
+                $account = $this->getHelper()
+                    ->getUser($type, $accountNum);
+
+                if ( $account ) {
+                    $this->executeAccountView( $account );
+                    return;
+                }
+            }
+
+            // If accounts doesn't exist, redirect to the account selector
+            $this->getOutput()
+                ->redirect(SpecialPage::getTitleFor('Socials')->getFullURL());
+
+        } else {
+            // No current account selected, display the selector / creator view
+            $this->executeAccountSelector();
+
         }
-
-        // No current account selected, display the selector / creator view
-        $this->executeAccountSelector();
     }
 
-    public function executeAccountSelector() {
-        
+    /**
+     * Display the account selector, or the option to create a new account
+     * @return void
+     */
+    public function executeAccountSelector(): void {
+        $accounts = $this->getHelper()
+            ->getUsers();
     }
 
-    public function executeAccountView() {
+    /**
+     * Display the account view for an ATProto account
+     * @param SocialMediaUser $user User to display options for
+     * @return void
+     */
+    public function executeAccountView( SocialMediaUser $user ): void {
         
     }
 }

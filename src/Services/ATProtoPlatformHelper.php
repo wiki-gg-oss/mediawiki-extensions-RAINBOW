@@ -2,14 +2,12 @@
 
 namespace MediaWiki\Extension\ATBridge\Services;
 
-use Exception;
 use http\Exception\UnexpectedValueException;
 use MediaWiki\Config\Config;
 use MediaWiki\Extension\ATBridge\Consts\ConfigNames;
 use MediaWiki\Extension\ATBridge\SocialMediaUser;
 use MediaWiki\MainConfigNames;
 use MediaWiki\WikiMap\WikiMap;
-use stdClass;
 use Wikimedia\Rdbms\LBFactory;
 use Wikimedia\Rdbms\SelectQueryBuilder;
 use Wikimedia\Stats\Exceptions\IllegalOperationException;
@@ -29,11 +27,22 @@ final class ATProtoPlatformHelper {
 	/**
 	 * Get the SocialMediaUser for this wiki for the given platform
 	 * @param string $platform
+     * @param ?int $wikiUniq
 	 * @return ?SocialMediaUser
 	 */
-	public function getUser( string $platform ): ?SocialMediaUser {
+	public function getUser( string $platform, ?int $wikiUniq = null ): ?SocialMediaUser {
+	    $wikiId = null;
+	    $where = [
+            'at_platform' => $platform,
+            'at_wiki' => $wikiId
+        ];
+
+        if ( $wikiUniq ) {
+            $where['at_platform_uniq'] = $wikiUniq;
+        }
+
 		$query = $this->newUsersDatabaseQuery()
-			->where( [ 'at_platform' => $platform ] )
+			->where( $where )
 			->limit( 1 );
 
 		// Complete the query
@@ -48,9 +57,22 @@ final class ATProtoPlatformHelper {
 	 * @return SocialMediaUser[]
 	 */
 	public function getUsers(): array {
-		$query = $this->newUsersDatabaseQuery();
+        $wikiId = null;
+		$query = $this->newUsersDatabaseQuery()
+		    ->where( [ 'at_wiki' => $wikiId ] );
+
 		return $this->queryUsers( $query );
 	}
+
+    /**
+     * Get all the SocialMediaUsers that are currently registered
+     * @return SocialMediaUser[]
+     */
+    public function getAllUsers(): array {
+        $query = $this->newUsersDatabaseQuery();
+
+        return $this->queryUsers( $query );
+    }
 
 	/**
 	 * Read a new user from the given row
@@ -60,13 +82,20 @@ final class ATProtoPlatformHelper {
 	private function queryUsers( SelectQueryBuilder $query ): array {
 		$users = [];
 		$results = $query->fetchResultSet();
+
 		foreach ( $results as $row ) {
 			// Create the user account
-			$user = new SocialMediaUser( $row->at_platform, $row->at_handle );
+			$user = new SocialMediaUser(
+			    $row->at_platform,
+			    $row->at_platform_uniq,
+			    $row->at_handle
+			);
 
 			$user->domainHandle = $row->at_domain;
 			$user->email = $row->at_email;
 			$user->password = $this->decryptPasscode( $row->at_passcode );
+
+            $user->globalId = $row->at_uniq;
 
 			$users[] = $user;
 		}
@@ -86,12 +115,14 @@ final class ATProtoPlatformHelper {
 		return $db->newSelectQueryBuilder()
 			->table( 'atproto_users' )
 			->fields( [
-				'at_wiki',
-				'at_platform',
-				'at_handle',
-				'at_domain',
-				'at_email',
-				'at_passcode',
+			    'at_uniq', // Unique ID (For wiki farms)
+				'at_wiki', // The wiki db key that made this account
+				'at_platform', // The platform that the account was made on
+				'at_platform_uniq', // The nth account made by this wiki
+				'at_handle', // Randomly generated string handle used for the account
+				'at_domain', // Domain string used as the handle for the account
+				'at_email', // The email used to register the account
+				'at_passcode', // The password that was used to make the account
 			] )
 			->where( [ 'at_wiki' => WikiMap::getCurrentWikiId() ] )
 			->caller( $caller );

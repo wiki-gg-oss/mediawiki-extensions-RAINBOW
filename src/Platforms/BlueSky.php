@@ -7,18 +7,26 @@ use MediaWiki\Extension\ATBridge\Services\ATProtoPlatformHelper;
 
 class BlueSky extends AbstractATProtoPlatform {
 	public function __construct(
-		private readonly BlueSkyAPI $api,
+		BlueSkyAPI $api,
 		ATProtoPlatformHelper $helper,
 	) {
-		parent::__construct( 'bluesky', $helper );
+		parent::__construct( 'bluesky', $api, $helper );
 	}
 
-	/**
+    /**
+     * @return BlueSkyAPI
+     */
+    public function getAPI(): BlueSkyAPI {
+        return parent::getAPI();
+    }
+
+    /**
 	 * POST a payload to the account creation endpoint
 	 * @param array $payload Payload details for creation
 	 * @return ?string
 	 */
 	public function createAccount( array $payload ): ?string {
-		return $this->api->post( '/xrpc/com.atproto.server.createAccount', $payload );
+		return $this->getAPI()
+		    ->post( '/xrpc/com.atproto.server.createAccount', $payload );
 	}
 }

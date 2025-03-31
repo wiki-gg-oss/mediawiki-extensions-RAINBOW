@@ -11,10 +11,15 @@ use MediaWiki\Extension\ATBridge\SocialMediaUser;
 abstract class AbstractATProtoPlatform {
 	public function __construct(
 		public readonly string $name,
+		private readonly AbstractATAPI $api,
 		private readonly ATProtoPlatformHelper $helper
 	) {
 		
 	}
+
+    public function getAPI(): AbstractATAPI {
+        return $this->api;
+    }
 
 	/**
 	 * If the given platform requires an email to register
