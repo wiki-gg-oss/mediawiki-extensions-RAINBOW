@@ -2,12 +2,12 @@
 
 namespace MediaWiki\Extension\ATBridge\Services;
 
-use http\Exception\UnexpectedValueException;
 use MediaWiki\Config\Config;
 use MediaWiki\Extension\ATBridge\Consts\ConfigNames;
 use MediaWiki\Extension\ATBridge\SocialMediaUser;
-use MediaWiki\MainConfigNames;
 use MediaWiki\WikiMap\WikiMap;
+use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IReadableDatabase;
 use Wikimedia\Rdbms\LBFactory;
 use Wikimedia\Rdbms\SelectQueryBuilder;
 use Wikimedia\Stats\Exceptions\IllegalOperationException;
@@ -31,7 +31,7 @@ final class ATProtoPlatformHelper {
 	 * @return ?SocialMediaUser
 	 */
 	public function getUser( string $platform, ?int $wikiUniq = null ): ?SocialMediaUser {
-	    $wikiId = null;
+	    $wikiId = WikiMap::getCurrentWikiId();
 	    $where = [
             'at_platform' => $platform,
             'at_wiki' => $wikiId
@@ -57,9 +57,8 @@ final class ATProtoPlatformHelper {
 	 * @return SocialMediaUser[]
 	 */
 	public function getUsers(): array {
-        $wikiId = null;
 		$query = $this->newUsersDatabaseQuery()
-		    ->where( [ 'at_wiki' => $wikiId ] );
+		    ->where( [ 'at_wiki' => WikiMap::getCurrentWikiId() ] );
 
 		return $this->queryUsers( $query );
 	}
@@ -104,15 +103,8 @@ final class ATProtoPlatformHelper {
 	}
 
 	private function newUsersDatabaseQuery( string $caller = __METHOD__ ): SelectQueryBuilder {
-		$wikiId = $this->config->get( ConfigNames::CentralWiki );
-		$wikiIds = $this->config->get( MainConfigNames::LocalDatabases );
-
-		if ( !in_array( $wikiId, $wikiIds ) ) {
-			throw new UnexpectedValueException( "\"{$wikiId}\" is not a valid database for querying AT Protocol users" );
-		}
-
-		$db = $this->factory->getReplicaDatabase( $wikiId );
-		return $db->newSelectQueryBuilder()
+		return $this->getReadDatabase()
+		    ->newSelectQueryBuilder()
 			->table( 'atproto_users' )
 			->fields( [
 			    'at_uniq', // Unique ID (For wiki farms)
@@ -129,19 +121,18 @@ final class ATProtoPlatformHelper {
 	}
 
 	public function saveUser( SocialMediaUser $user ): bool {
-		$wikiId = $this->config->get( ConfigNames::CentralWiki );
-		$wikiIds = $this->config->get( MainConfigNames::LocalDatabases );
+	    // If we already have a global Id, we need to update and not insert new
+	    if ( $user->globalId ) {
+	        return false;
+	    }
 
-		if ( !in_array( $wikiId, $wikiIds ) ) {
-			throw new UnexpectedValueException( "\"{$wikiId}\" is not a valid database for querying AT Protocol users" );
-		}
-
-		$db = $this->factory->getPrimaryDatabase( $wikiId );
+		$db = $this->getWriteDatabase();
 		$db->newInsertQueryBuilder()
 			->table( 'atproto_users' )
 			->row( [
 				'at_wiki' => WikiMap::getCurrentWikiId(),
 				'at_platform' => $user->platform,
+				'at_platform_uniq' => $user->wikiId,
 				'at_handle' => $user->baseHandle,
 				'at_domain' => $user->domainHandle,
 				'at_email' => $user->email,
@@ -150,8 +141,37 @@ final class ATProtoPlatformHelper {
 			->caller( __METHOD__ )
 			->execute();
 
+        if ( !$db->lastErrno() ) {
+            $user->globalId = $db->insertId();
+            return true;
+        }
+
 		return false;
 	}
+
+    public function updateUser( SocialMediaUser $user ): bool {
+        // Must have a global Id in order to update
+        if ( !$user->globalId ) {
+            return false;
+        }
+
+        $db = $this->getWriteDatabase();
+        $db->newUpdateQueryBuilder()
+            ->table( 'atproto_users' )
+            ->set([
+                'at_handle' => $user->baseHandle,
+                'at_domain' => $user->domainHandle,
+                'at_email' => $user->email,
+                'at_passcode' => $this->encryptPasscode( $user->password )
+            ])
+            ->where([
+                'at_uniq' => $user->globalId
+            ])
+            ->caller( __METHOD__ )
+            ->execute();
+
+        return !$db->lastErrno();
+    }
 
 	private function encryptPasscode( string $passcode ): string {
 		$key = $this->config->get( ConfigNames::EncryptionKey );
@@ -221,4 +241,17 @@ final class ATProtoPlatformHelper {
 
 		return implode( ' ', $values );
 	}
+	
+	private function getReadDatabase(): IReadableDatabase {
+        return $this->factory->getReplicaDatabase( $this->getDatabaseKey() );
+    }
+    
+    private function getWriteDatabase(): IDatabase {
+        return $this->factory->getPrimaryDatabase( $this->getDatabaseKey() );
+    }
+    
+    private function getDatabaseKey(): string {
+        $wikiId = $this->config->get( ConfigNames::CentralWiki );
+        return $wikiId ?? WikiMap::getCurrentWikiId();
+    }
 }

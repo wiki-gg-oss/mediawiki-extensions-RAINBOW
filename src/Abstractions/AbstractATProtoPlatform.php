@@ -52,4 +52,13 @@ abstract class AbstractATProtoPlatform {
 	public function getUser(): ?SocialMediaUser {
 		return $this->helper->getUser( $this->name );
 	}
+
+    /**
+     * POST a payload to the account creation endpoint
+     * @param array $payload Payload details for creation
+     * @return mixed
+     */
+    protected function apiCreateAccount( array $payload ): mixed {
+        return $this->api->post( '/xrpc/com.atproto.server.createAccount', $payload );
+    }
 }

@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\ATBridge\Abstractions;
 
-use FormatJson;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\Http\HttpRequestFactory;
 use MediaWiki\Utils\UrlUtils;
 
@@ -23,7 +23,7 @@ abstract class AbstractATAPI {
 		return $this->requestFactory->get( $this->urls->expand( $path ) );
 	}
 
-	public function post( $path, array $payload ): ?string {
+	public function post( $path, array $payload ): mixed {
 		$req = $this->requestFactory->create( $this->urls->expand( $path ), [
 			// Encode our payload into JSON
 			'postData' => FormatJson::encode( $payload, false, FormatJson::ALL_OK )
@@ -32,10 +32,12 @@ abstract class AbstractATAPI {
 		// Set the content type to JSON
 		$req->setHeader( 'Content-Type', 'application/json' );
 
+        // Execute the HTTP request
 		$status = $req->execute();
 
 		if ( $status->isOK() ) {
-			return $req->getContent();
+		    // Convert to JSON
+			return FormatJson::decode( $req->getContent() );
 		} else {
 			wfDebugLog( 'ATBridge', "Bad Request {$req->getContent()}" );
 			return null;

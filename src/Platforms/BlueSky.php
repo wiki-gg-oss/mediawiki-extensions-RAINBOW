@@ -26,7 +26,6 @@ class BlueSky extends AbstractATProtoPlatform {
 	 * @return ?string
 	 */
 	public function createAccount( array $payload ): ?string {
-		return $this->getAPI()
-		    ->post( '/xrpc/com.atproto.server.createAccount', $payload );
+		return $this->apiCreateAccount( $payload );
 	}
 }

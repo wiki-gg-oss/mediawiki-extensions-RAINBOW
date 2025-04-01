@@ -1,2 +1,22 @@
 [
+	{
+		"name": "atproto_post",
+		"comment": "Table containing all posts that have been sent to an ATProto platform",
+		"columns": [
+			{
+				"name": "post_account",
+				"comment": "Unique ID of the ATProto account that the post is sent to",
+				"type": "integer",
+				"options": { "unsigned": true, "notnull": true }
+			},
+			{
+				"name": "post_user",
+				"comment": "Wiki user that created the post",
+				"type": "integer",
+				"options": { "notnull": false }
+			}
+		],
+		"indexes": [],
+		"pk": []
+	}
 ]

@@ -1,2 +1,70 @@
 [
+	{
+		"name": "atproto_users",
+		"comment": "Central table of all ATProto accounts that have been created",
+		"columns": [
+			{
+				"name": "at_uniq",
+				"comment": "Unique ID (For wiki farms)",
+				"type": "integer",
+				"options": { "unsigned": true, "notnull": true, "autoincrement": true }
+			},
+			{
+				"name": "at_wiki",
+				"comment": "The wiki db key that made this account",
+				"type": "binary",
+				"options": { "notnull": true, "length": 255 }
+			},
+			{
+				"name": "at_platform",
+				"comment": "The platform that the account was made on",
+				"type": "binary",
+				"options": { "notnull": true, "length": 0 }
+			},
+			{
+				"name": "at_platform_uniq",
+				"comment": "The nth account (Of platform type) made by this wiki",
+				"type": "integer",
+				"options": { "unsigned": true, "notnull": true }
+			},
+			{
+				"name": "at_handle",
+				"comment": "Randomly generated string handle used for the account",
+				"type": "binary",
+				"options": { "notnull": true, "length": 0 }
+			},
+			{
+				"name": "at_domain",
+				"comment": "Domain string used as the handle for the account",
+				"type": "binary",
+				"options": { "notnull": false, "length": 0 }
+			},
+			{
+				"name": "at_email",
+				"comment": "The email used to register the account",
+				"type": "binary",
+				"options": { "notnull": true, "length": 0 }
+			},
+			{
+				"name": "at_passcode",
+				"comment": "The password that was used to make the account",
+				"type": "binary",
+				"options": { "notnull": true, "length": 0 }
+			}
+		],
+		"indexes": [
+			{ "name": "per_wiki_user", "columns": [ "at_wiki", "at_platform", "at_platform_uniq" ], "unique": true },
+			{ "name": "at_wiki", "columns": [ "at_wiki" ], "unique": false }
+		],
+		"pk": [ "at_uniq" ]
+	},
+	{
+		"name": "atproto_optin",
+		"comment": "Central table for holding Categories that wikis have opted into allowing reposts for",
+		"columns": [
+			
+		],
+		"indexes": [],
+		"pk": []
+	}
 ]
