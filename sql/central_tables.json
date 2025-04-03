@@ -62,9 +62,28 @@
 		"name": "atproto_optin",
 		"comment": "Central table for holding Categories that wikis have opted into allowing reposts for",
 		"columns": [
-			
+			{
+				"name": "opt_account",
+				"comment": "Unique ID of the wiki account",
+				"type": "integer",
+				"options": { "unsigned": true, "notnull": true }
+			},
+			{
+				"name": "opt_key",
+				"comment": "Category key",
+				"type": "binary",
+				"options": { "notnull": true, "length": 255 }
+			},
+			{
+				"name": "opt_value",
+				"comment": "Category opt-in value (bool)",
+				"type": "mwtinyint",
+				"options": { "notnull": true }
+			}
 		],
-		"indexes": [],
-		"pk": []
+		"indexes": [
+			{ "name": "opt_account", "columns": [ "opt_account" ], "unique": false }
+		],
+		"pk": [ "opt_account", "opt_key" ]
 	}
 ]

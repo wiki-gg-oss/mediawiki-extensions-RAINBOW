@@ -36,7 +36,13 @@
 	},
 	"HookHandlers": {
 		"Default": {
-			"class": "MediaWiki\\Extension\\ATBridge\\DefaultRegistrationHooks"
+			"class": "MediaWiki\\Extension\\ATBridge\\Hooks\\DefaultRegistrationHooks",
+			"services": [
+				"UrlUtils",
+				"MainConfig",
+				"ATProtoPlatformHelper",
+				"HttpRequestFactory"
+			]
 		}
 	},
 	"AvailableRights": [

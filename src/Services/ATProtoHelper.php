@@ -2,8 +2,9 @@
 
 namespace MediaWiki\Extension\ATBridge\Services;
 
+use MediaWiki\Extension\ATBridge\Abstractions\AbstractATProtoPlatform;
+use MediaWiki\Extension\ATBridge\Abstractions\AbstractDomainValidator;
 use MediaWiki\HookContainer\HookContainer;
-use MediaWiki\MediaWikiServices;
 
 /**
  * Helper for general ATProto extension functionality
@@ -19,17 +20,37 @@ final class ATProtoHelper {
 	) {
 	}
 
+    /**
+     * Get all registered ATProto platforms
+     * @return AbstractATProtoPlatform[]
+     */
 	public function getPlatforms(): array {
 		if ( !$this->atPlatforms ) {
-			$this->hooks->run( 'ATProtoPlatformRegistration', [  ] );
+		    $platforms = [];
+
+			$this->hooks->run( 'ATBridgePlatformRegistration', [ &$platforms ], [
+			    'abortable' => false
+            ] );
+
+            $this->atPlatforms = $platforms;
 		}
 
 		return $this->atPlatforms;
 	}
 
+    /**
+     * Get all forms of being able to validate a domain
+     * @return AbstractDomainValidator[]
+     */
 	public function getDomainValidators(): array {
 		if ( !$this->domainValidators ) {
-			$this->hooks->run( 'ATBridgeDomainValidatorRegistration', [  ] );
+		    $validators = [];
+
+			$this->hooks->run( 'ATBridgeDomainValidatorRegistration', [ &$validators ], [
+			    'abortable' => false
+            ] );
+
+			$this->domainValidators = $validators;
 		}
 
 		return $this->domainValidators;

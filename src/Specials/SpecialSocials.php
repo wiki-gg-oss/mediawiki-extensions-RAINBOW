@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\ATBridge\Specials;
 
 use ErrorPageError;
 use MediaWiki\Extension\ATBridge\Consts\GrantNames;
+use MediaWiki\Extension\ATBridge\Services\ATProtoHelper;
 use MediaWiki\Extension\ATBridge\Services\ATProtoPlatformHelper;
 use MediaWiki\Extension\ATBridge\SocialMediaUser;
 use MediaWiki\MediaWikiServices;
@@ -16,7 +17,12 @@ class SpecialSocials extends SpecialPage {
         parent::__construct( 'Socials', '', true );
     }
 
-    private function getHelper(): ATProtoPlatformHelper {
+    private function getHelper(): ATProtoHelper {
+        return MediaWikiServices::getInstance()
+            ->getService(ATProtoHelper::ServiceName);
+    }
+
+    private function getPlatformHelper(): ATProtoPlatformHelper {
         return MediaWikiServices::getInstance()
             ->getService(ATProtoPlatformHelper::ServiceName);
     }
@@ -59,7 +65,7 @@ class SpecialSocials extends SpecialPage {
 
             if ( is_numeric( $accountNum ) ) {
                 // Run a db search for the account
-                $account = $this->getHelper()
+                $account = $this->getPlatformHelper()
                     ->getUser($type, $accountNum);
 
                 if ( $account ) {
@@ -84,7 +90,9 @@ class SpecialSocials extends SpecialPage {
      * @return void
      */
     public function executeAccountSelector(): void {
-        $accounts = $this->getHelper()
+        $platforms = $this->getHelper()
+            ->getPlatforms();
+        $accounts = $this->getPlatformHelper()
             ->getUsers();
     }
 
