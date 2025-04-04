@@ -32,7 +32,8 @@
 	},
 	"Hooks": {
 		"ATProtoPlatformRegistration": "Default",
-		"ATProtoDomainValidationRegistration": "Default"
+		"ATProtoDomainValidationRegistration": "Default",
+		"LoadExtensionSchemaUpdates": "DbSchema"
 	},
 	"HookHandlers": {
 		"Default": {
@@ -43,6 +44,9 @@
 				"ATProtoPlatformHelper",
 				"HttpRequestFactory"
 			]
+		},
+		"DbSchema": {
+			"class": "MediaWiki\\Extension\\ATBridge\\Hooks\\DbSchemaHooks"
 		}
 	},
 	"AvailableRights": [

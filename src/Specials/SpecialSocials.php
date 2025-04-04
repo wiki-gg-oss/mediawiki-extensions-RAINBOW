@@ -7,10 +7,12 @@ use MediaWiki\Extension\ATBridge\Consts\GrantNames;
 use MediaWiki\Extension\ATBridge\Services\ATProtoHelper;
 use MediaWiki\Extension\ATBridge\Services\ATProtoPlatformHelper;
 use MediaWiki\Extension\ATBridge\SocialMediaUser;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\User\User;
 use PermissionsError;
+use stdClass;
 
 class SpecialSocials extends SpecialPage {
     public function __construct() {
@@ -94,6 +96,26 @@ class SpecialSocials extends SpecialPage {
             ->getPlatforms();
         $accounts = $this->getPlatformHelper()
             ->getUsers();
+
+        // Get all the keys for platforms
+        $keys = [];
+
+        // Get an ordered set of accounts
+        foreach ( $accounts as $account ) {
+            $keys[] = $account->platform;
+        }
+
+        foreach ( $platforms as $platform ) {
+            // If we already have an account for the platform
+            if ( in_array( $platform->name, $keys ) ) {
+                continue;
+            }
+
+            
+        }
+
+        $output = $this->getOutput();
+        $output->addHTML( Html::element('div', [], '') );
     }
 
     /**

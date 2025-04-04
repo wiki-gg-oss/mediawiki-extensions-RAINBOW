@@ -116,7 +116,7 @@ final class ATProtoPlatformHelper {
 				'at_email', // The email used to register the account
 				'at_passcode', // The password that was used to make the account
 			] )
-			->where( [ 'at_wiki' => WikiMap::getCurrentWikiId() ] )
+			->orderBy([ 'at_wiki', 'at_platform', 'at_platform_uniq' ])
 			->caller( $caller );
 	}
 

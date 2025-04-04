@@ -26,13 +26,23 @@ final class ATProtoHelper {
      */
 	public function getPlatforms(): array {
 		if ( !$this->atPlatforms ) {
-		    $platforms = [];
+		    $values = [];
 
-			$this->hooks->run( 'ATBridgePlatformRegistration', [ &$platforms ], [
+			$this->hooks->run( 'ATBridgePlatformRegistration', [ &$values ], [
 			    'abortable' => false
             ] );
 
-            $this->atPlatforms = $platforms;
+            if ( is_array( $values ) ) {
+                $platforms = [];
+
+                foreach ( $values as $value ) {
+                    if ( $value instanceof AbstractATProtoPlatform ) {
+                        $platforms[ $value->name ] = $value;
+                    }
+                }
+
+                $this->atPlatforms = $platforms;
+            }
 		}
 
 		return $this->atPlatforms;
