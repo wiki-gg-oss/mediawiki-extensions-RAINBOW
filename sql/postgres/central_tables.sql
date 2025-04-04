@@ -7,7 +7,7 @@ CREATE TABLE atproto_users (
   at_wiki TEXT NOT NULL,
   at_platform TEXT NOT NULL,
   at_platform_uniq INT NOT NULL,
-  at_handle TEXT NOT NULL,
+  at_handle TEXT DEFAULT NULL,
   at_domain TEXT DEFAULT NULL,
   at_email TEXT NOT NULL,
   at_passcode TEXT NOT NULL,

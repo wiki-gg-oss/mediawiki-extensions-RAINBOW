@@ -7,7 +7,7 @@ CREATE TABLE /*_*/atproto_users (
   at_wiki VARBINARY(255) NOT NULL,
   at_platform VARBINARY(255) NOT NULL,
   at_platform_uniq INT UNSIGNED NOT NULL,
-  at_handle VARBINARY(255) NOT NULL,
+  at_handle VARBINARY(255) DEFAULT NULL,
   at_domain VARBINARY(255) DEFAULT NULL,
   at_email VARBINARY(255) NOT NULL,
   at_passcode VARBINARY(255) NOT NULL,

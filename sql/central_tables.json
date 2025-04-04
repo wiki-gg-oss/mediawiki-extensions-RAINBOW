@@ -19,7 +19,7 @@
 				"name": "at_platform",
 				"comment": "The platform that the account was made on",
 				"type": "binary",
-				"options": { "notnull": true, "length": 0 }
+				"options": { "notnull": true, "length": 255 }
 			},
 			{
 				"name": "at_platform_uniq",
@@ -31,25 +31,25 @@
 				"name": "at_handle",
 				"comment": "Randomly generated string handle used for the account",
 				"type": "binary",
-				"options": { "notnull": true, "length": 0 }
+				"options": { "notnull": false, "length": 255 }
 			},
 			{
 				"name": "at_domain",
 				"comment": "Domain string used as the handle for the account",
 				"type": "binary",
-				"options": { "notnull": false, "length": 0 }
+				"options": { "notnull": false, "length": 255 }
 			},
 			{
 				"name": "at_email",
 				"comment": "The email used to register the account",
 				"type": "binary",
-				"options": { "notnull": true, "length": 0 }
+				"options": { "notnull": true, "length": 255 }
 			},
 			{
 				"name": "at_passcode",
 				"comment": "The password that was used to make the account",
 				"type": "binary",
-				"options": { "notnull": true, "length": 0 }
+				"options": { "notnull": true, "length": 255 }
 			}
 		],
 		"indexes": [

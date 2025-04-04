@@ -6,6 +6,7 @@ use MediaWiki\Config\Config;
 use MediaWiki\Extension\ATBridge\Consts\ConfigNames;
 use MediaWiki\Extension\ATBridge\SocialMediaUser;
 use MediaWiki\WikiMap\WikiMap;
+use ValueError;
 use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\IReadableDatabase;
 use Wikimedia\Rdbms\LBFactory;
@@ -120,11 +121,57 @@ final class ATProtoPlatformHelper {
 			->caller( $caller );
 	}
 
+    public function createUser( string $platform ): SocialMediaUser {
+        $email = $this->config->get( ConfigNames::Email );
+        if ( !$email ) {
+            throw new ValueError( 'Email address for ATProto accounts not configured' );
+        }
+
+        $password = ATProtoPasscodes::generate();
+        $id = 1;
+
+        wfDebugLog('ATBridge', 'Password ' . $password);
+
+        $query = $this->getReadDatabase()
+            ->newSelectQueryBuilder()
+            ->table( 'atproto_users' )
+            ->field( 'MAX(at_platform_uniq)', 'max' )
+            ->where( [
+                'at_wiki' => WikiMap::getCurrentWikiId(),
+                'at_platform' => $platform
+            ] )
+            ->caller( __METHOD__ )
+            ->fetchRow();
+
+        // If read from the database, take the current max id and add 1
+        if ( $query ) {
+            $id = intval( $query->max ) + 1;
+        }
+
+        $user = new SocialMediaUser( $platform, $id );
+
+        $user->email = $email;
+        $user->password = $password;
+
+        return $user;
+    }
+
 	public function saveUser( SocialMediaUser $user ): bool {
 	    // If we already have a global Id, we need to update and not insert new
 	    if ( $user->globalId ) {
 	        return false;
 	    }
+
+        if ( !$user->email ) {
+            throw new ValueError( 'Unable to save atproto user to database, missing a configured registration email' );
+        }
+
+        if ( !$user->password ) {
+            throw new ValueError( 'Unable to save atproto user to database, missing a configured generated password' );
+        }
+
+        $passcode = $this->encryptPasscode( $user->password );
+        wfDebugLog('ATBridge', 'Encrypted password ' . $passcode);
 
 		$db = $this->getWriteDatabase();
 		$db->newInsertQueryBuilder()
@@ -136,7 +183,7 @@ final class ATProtoPlatformHelper {
 				'at_handle' => $user->baseHandle,
 				'at_domain' => $user->domainHandle,
 				'at_email' => $user->email,
-				'at_passcode' => $this->encryptPasscode( $user->password ),
+				'at_passcode' => $passcode,
 			] )
 			->caller( __METHOD__ )
 			->execute();
@@ -179,16 +226,7 @@ final class ATProtoPlatformHelper {
 			throw new IllegalOperationException( 'Should not be reachable here when an encryption key has not been defined' );
 		}
 
-		$size = openssl_cipher_iv_length( 'sha256' );
-		$nonce = openssl_random_pseudo_bytes( $size );
-
-		return base64_encode( openssl_encrypt(
-			$passcode,
-			'sha256',
-			$key,
-			OPENSSL_RAW_DATA,
-			$nonce
-		) );
+        return ATProtoPasscodes::encryptPasscode( $key, $passcode );
 	}
 
 	private function decryptPasscode( string $encrypted ): ?string {
@@ -197,22 +235,7 @@ final class ATProtoPlatformHelper {
 			throw new IllegalOperationException( 'Should not be reachable here when an encryption key has not been defined' );
 		}
 
-		$raw = base64_decode( $encrypted );
-		if ( !$raw ) {
-			return null;
-		}
-
-		$size = openssl_cipher_iv_length( 'sha256' );
-		$nonce = mb_substr( $raw, 0, $size, '8bit' );
-		$passcode = mb_substr( $raw, $size, null, '8bit' );
-
-		return openssl_decrypt(
-			$passcode,
-			'sha256',
-			$key,
-			OPENSSL_RAW_DATA,
-			$nonce
-		);
+		return ATProtoPasscodes::decryptPasscode( $key, $encrypted );
 	}
 
 	/**
@@ -241,15 +264,15 @@ final class ATProtoPlatformHelper {
 
 		return implode( ' ', $values );
 	}
-	
+
 	private function getReadDatabase(): IReadableDatabase {
         return $this->factory->getReplicaDatabase( $this->getDatabaseKey() );
     }
-    
+
     private function getWriteDatabase(): IDatabase {
         return $this->factory->getPrimaryDatabase( $this->getDatabaseKey() );
     }
-    
+
     private function getDatabaseKey(): string {
         $wikiId = $this->config->get( ConfigNames::CentralWiki );
         return $wikiId ?? WikiMap::getCurrentWikiId();

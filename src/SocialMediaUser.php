@@ -4,7 +4,7 @@ namespace MediaWiki\Extension\ATBridge;
 
 class SocialMediaUser {
     /** @var ?int $globalId Global (wiki-farm) Id for the account */
-    public ?int $globalId;
+    public ?int $globalId = null;
 
 	/** @var string $platform Platform hosting the account (bluesky) */
 	public readonly string $platform;
@@ -12,8 +12,8 @@ class SocialMediaUser {
     /** @var int $wikiId Id of the user for a single given wiki */
     public readonly int $wikiId;
 
-	/** @var string $baseHandle Default handle for the account (*.bsky.social) */
-	public readonly string $baseHandle;
+	/** @var ?string $baseHandle Default handle for the account (*.bsky.social) */
+	public readonly ?string $baseHandle;
 
 	/** @var ?string $domainHandle Base handle for the account (*.wiki.gg) */
 	public ?string $domainHandle = null;
@@ -27,7 +27,7 @@ class SocialMediaUser {
 	public function __construct(
 	    string $platform,
 	    int $wikiId,
-	    string $handle
+	    ?string $handle = null
 	) {
 		$this->platform = $platform;
 		$this->wikiId = $wikiId;

@@ -31,8 +31,8 @@
 		"Socials": "MediaWiki\\Extension\\ATBridge\\Specials\\SpecialSocials"
 	},
 	"Hooks": {
-		"ATProtoPlatformRegistration": "Default",
-		"ATProtoDomainValidationRegistration": "Default",
+		"ATBridgePlatformRegistration": "Default",
+		"ATBridgeDomainValidationRegistration": "Default",
 		"LoadExtensionSchemaUpdates": "DbSchema"
 	},
 	"HookHandlers": {

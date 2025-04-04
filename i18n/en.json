@@ -4,5 +4,11 @@
 			"TheElm"
 		]
 	},
-	"rainbow-desc": "Bridge to allow wiki admins to post content to platforms that support the AT Protocol, such as BlueSky"
+	"rainbow-desc": "Bridge to allow wiki admins to post content to platforms that support the AT Protocol, such as BlueSky",
+	
+	"atbridge-platform-exists": "Account Exists",
+	"atbridge-platform-exists-desc": "Cannot create a duplicate account for $1.",
+	
+	"atbridge-platform-missing": "Invalid Platform",
+	"atbridge-platform-missing-desc": "The AT Protocol platform $1 has not been configured."
 }

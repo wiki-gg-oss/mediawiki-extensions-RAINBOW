@@ -6,7 +6,7 @@ CREATE TABLE /*_*/atproto_users (
   at_uniq INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   at_wiki BLOB NOT NULL, at_platform BLOB NOT NULL,
   at_platform_uniq INTEGER UNSIGNED NOT NULL,
-  at_handle BLOB NOT NULL, at_domain BLOB DEFAULT NULL,
+  at_handle BLOB DEFAULT NULL, at_domain BLOB DEFAULT NULL,
   at_email BLOB NOT NULL, at_passcode BLOB NOT NULL
 );
 
